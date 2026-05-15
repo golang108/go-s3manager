@@ -11,7 +11,7 @@ import (
 func HandleBucketsView(s3 S3, templates fs.FS, allowDelete bool, rootURL string) http.HandlerFunc {
 	type pageData struct {
 		RootURL      string
-		Buckets      []interface{}
+		Buckets      []any
 		AllowDelete  bool
 		CurrentS3    *S3Instance
 		S3Instances  []*S3Instance
@@ -33,7 +33,7 @@ func HandleBucketsView(s3 S3, templates fs.FS, allowDelete bool, rootURL string)
 			return
 		}
 
-		data.Buckets = make([]interface{}, len(buckets))
+		data.Buckets = make([]any, len(buckets))
 		for i, bucket := range buckets {
 			data.Buckets[i] = bucket
 		}

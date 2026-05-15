@@ -31,7 +31,7 @@ type objectWithIconExtended struct {
 func HandleBucketsViewWithManager(manager *MultiS3Manager, templates fs.FS, allowDelete bool, rootURL string) http.HandlerFunc {
 	type pageData struct {
 		RootURL      string
-		Buckets      []interface{}
+		Buckets      []any
 		AllowDelete  bool
 		CurrentS3    *S3Instance
 		S3Instances  []*S3Instance
@@ -66,9 +66,9 @@ func HandleBucketsViewWithManager(manager *MultiS3Manager, templates fs.FS, allo
 			// Instead of returning an HTTP error, show a user-friendly message
 			data.HasError = true
 			data.ErrorMessage = fmt.Sprintf("Unable to connect to S3 instance '%s'. Please check the credentials and try switching to another instance.", current.Name)
-			data.Buckets = make([]interface{}, 0) // Empty buckets list
+			data.Buckets = make([]any, 0) // Empty buckets list
 		} else {
-			data.Buckets = make([]interface{}, len(buckets))
+			data.Buckets = make([]any, len(buckets))
 			for i, bucket := range buckets {
 				data.Buckets[i] = bucket
 			}
