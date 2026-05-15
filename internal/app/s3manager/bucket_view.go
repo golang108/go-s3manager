@@ -36,6 +36,7 @@ func HandleBucketView(s3 S3, templates fs.FS, allowDelete bool, listRecursive bo
 		AllowDelete  bool
 		Paths        []string
 		CurrentPath  string
+		Endpoint     string
 		CurrentS3    *S3Instance
 		S3Instances  []*S3Instance
 		HasError     bool
@@ -164,6 +165,7 @@ func HandleBucketView(s3 S3, templates fs.FS, allowDelete bool, listRecursive bo
 			AllowDelete:  allowDelete,
 			Paths:        removeEmptyStrings(strings.Split(path, "/")),
 			CurrentPath:  path,
+			Endpoint:     s3.EndpointURL().String(),
 			CurrentS3:    nil,
 			S3Instances:  nil,
 			HasError:     false,

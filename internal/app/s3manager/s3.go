@@ -22,6 +22,7 @@ type S3 interface {
 	RemoveBucket(ctx context.Context, bucketName string) error
 	RemoveObject(ctx context.Context, bucketName, objectName string, opts minio.RemoveObjectOptions) error
 	RemoveObjects(ctx context.Context, bucketName string, objectsCh <-chan minio.ObjectInfo, opts minio.RemoveObjectsOptions) <-chan minio.RemoveObjectError
+	EndpointURL() *url.URL
 }
 
 // SSEType describes a type of server side encryption.

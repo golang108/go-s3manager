@@ -232,6 +232,24 @@ func HandleDeleteObjectWithManager(manager *MultiS3Manager) http.HandlerFunc {
 	}
 }
 
+// HandleCheckPublicAccessWithManager checks if an object is publicly accessible using MultiS3Manager.
+func HandleCheckPublicAccessWithManager(manager *MultiS3Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		instanceName := vars["instance"]
+
+		current, err := manager.GetInstance(instanceName)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Instance not found: %s", err.Error()), http.StatusNotFound)
+			return
+		}
+
+		s3 := current.Client
+		handler := HandleCheckPublicAccess(s3)
+		handler(w, r)
+	}
+}
+
 // createBucketViewWithS3Data creates a bucket view handler that includes S3 instance data
 func createBucketViewWithS3Data(s3 S3, templates fs.FS, allowDelete bool, listRecursive bool, rootURL string, current *S3Instance, instances []*S3Instance) http.HandlerFunc {
 	type pageData struct {
@@ -241,6 +259,7 @@ func createBucketViewWithS3Data(s3 S3, templates fs.FS, allowDelete bool, listRe
 		AllowDelete  bool
 		Paths        []string
 		CurrentPath  string
+		Endpoint     string
 		CurrentS3    *S3Instance
 		S3Instances  []*S3Instance
 		HasError     bool
@@ -407,6 +426,7 @@ func createBucketViewWithS3Data(s3 S3, templates fs.FS, allowDelete bool, listRe
 			AllowDelete:  allowDelete,
 			Paths:        removeEmptyStrings(strings.Split(path, "/")),
 			CurrentPath:  path,
+			Endpoint:     s3.EndpointURL().String(),
 			CurrentS3:    current,
 			S3Instances:  instances,
 			HasError:     hasError,
