@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -54,7 +55,11 @@ func HandleBucketView(s3 S3, templates fs.FS, allowDelete bool, listRecursive bo
 		regex := regexp.MustCompile(`\/buckets\/([^\/]*)\/?(.*)`)
 		matches := regex.FindStringSubmatch(r.URL.Path)
 		bucketName := matches[1]
-		path := matches[2]
+		path, rqerr := url.QueryUnescape(matches[2])
+		if rqerr != nil {
+			handleHTTPError(w, rqerr)
+			return
+		}
 
 		// Get sorting parameters from query string
 		sortBy := r.URL.Query().Get("sortBy")
