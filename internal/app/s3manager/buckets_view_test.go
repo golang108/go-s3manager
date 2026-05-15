@@ -47,7 +47,7 @@ func TestHandleBucketsView(t *testing.T) {
 				return []minio.BucketInfo{}, errS3
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
-			expectedBodyContains: http.StatusText(http.StatusInternalServerError),
+			expectedBodyContains: "mocked s3 error",
 		},
 	}
 

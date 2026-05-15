@@ -517,6 +517,42 @@ func HandleBulkDeleteObjectsWithManager(manager *MultiS3Manager) http.HandlerFun
 	}
 }
 
+// HandleGetBucketPolicyWithManager retrieves the policy for a bucket using MultiS3Manager.
+func HandleGetBucketPolicyWithManager(manager *MultiS3Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		instanceName := vars["instance"]
+
+		current, err := manager.GetInstance(instanceName)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Instance not found: %s", err.Error()), http.StatusNotFound)
+			return
+		}
+
+		s3 := current.Client
+		handler := HandleGetBucketPolicy(s3)
+		handler(w, r)
+	}
+}
+
+// HandlePutBucketPolicyWithManager sets the policy for a bucket using MultiS3Manager.
+func HandlePutBucketPolicyWithManager(manager *MultiS3Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		instanceName := vars["instance"]
+
+		current, err := manager.GetInstance(instanceName)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Instance not found: %s", err.Error()), http.StatusNotFound)
+			return
+		}
+
+		s3 := current.Client
+		handler := HandlePutBucketPolicy(s3)
+		handler(w, r)
+	}
+}
+
 // HandleBulkDownloadObjectsWithManager downloads multiple objects as a ZIP using MultiS3Manager.
 func HandleBulkDownloadObjectsWithManager(manager *MultiS3Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

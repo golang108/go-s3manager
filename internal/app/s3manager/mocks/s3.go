@@ -26,6 +26,9 @@ var _ s3manager.S3 = &S3Mock{}
 //			EndpointURLFunc: func() *url.URL {
 //				panic("mock out the EndpointURL method")
 //			},
+//			GetBucketPolicyFunc: func(ctx context.Context, bucketName string) (string, error) {
+//				panic("mock out the GetBucketPolicy method")
+//			},
 //			GetObjectFunc: func(ctx context.Context, bucketName string, objectName string, opts minio.GetObjectOptions) (*minio.Object, error) {
 //				panic("mock out the GetObject method")
 //			},
@@ -53,6 +56,9 @@ var _ s3manager.S3 = &S3Mock{}
 //			RemoveObjectsFunc: func(ctx context.Context, bucketName string, objectsCh <-chan minio.ObjectInfo, opts minio.RemoveObjectsOptions) <-chan minio.RemoveObjectError {
 //				panic("mock out the RemoveObjects method")
 //			},
+//			SetBucketPolicyFunc: func(ctx context.Context, bucketName string, policy string) error {
+//				panic("mock out the SetBucketPolicy method")
+//			},
 //		}
 //
 //		// use mockedS3 in code that requires s3manager.S3
@@ -62,6 +68,9 @@ var _ s3manager.S3 = &S3Mock{}
 type S3Mock struct {
 	// EndpointURLFunc mocks the EndpointURL method.
 	EndpointURLFunc func() *url.URL
+
+	// GetBucketPolicyFunc mocks the GetBucketPolicy method.
+	GetBucketPolicyFunc func(ctx context.Context, bucketName string) (string, error)
 
 	// GetObjectFunc mocks the GetObject method.
 	GetObjectFunc func(ctx context.Context, bucketName string, objectName string, opts minio.GetObjectOptions) (*minio.Object, error)
@@ -90,10 +99,20 @@ type S3Mock struct {
 	// RemoveObjectsFunc mocks the RemoveObjects method.
 	RemoveObjectsFunc func(ctx context.Context, bucketName string, objectsCh <-chan minio.ObjectInfo, opts minio.RemoveObjectsOptions) <-chan minio.RemoveObjectError
 
+	// SetBucketPolicyFunc mocks the SetBucketPolicy method.
+	SetBucketPolicyFunc func(ctx context.Context, bucketName string, policy string) error
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// EndpointURL holds details about calls to the EndpointURL method.
 		EndpointURL []struct {
+		}
+		// GetBucketPolicy holds details about calls to the GetBucketPolicy method.
+		GetBucketPolicy []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// BucketName is the bucketName argument value.
+			BucketName string
 		}
 		// GetObject holds details about calls to the GetObject method.
 		GetObject []struct {
@@ -186,8 +205,18 @@ type S3Mock struct {
 			// Opts is the opts argument value.
 			Opts minio.RemoveObjectsOptions
 		}
+		// SetBucketPolicy holds details about calls to the SetBucketPolicy method.
+		SetBucketPolicy []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// BucketName is the bucketName argument value.
+			BucketName string
+			// Policy is the policy argument value.
+			Policy string
+		}
 	}
 	lockEndpointURL        sync.RWMutex
+	lockGetBucketPolicy    sync.RWMutex
 	lockGetObject          sync.RWMutex
 	lockListBuckets        sync.RWMutex
 	lockListObjects        sync.RWMutex
@@ -197,6 +226,7 @@ type S3Mock struct {
 	lockRemoveBucket       sync.RWMutex
 	lockRemoveObject       sync.RWMutex
 	lockRemoveObjects      sync.RWMutex
+	lockSetBucketPolicy    sync.RWMutex
 }
 
 // EndpointURL calls EndpointURLFunc.
@@ -223,6 +253,42 @@ func (mock *S3Mock) EndpointURLCalls() []struct {
 	mock.lockEndpointURL.RLock()
 	calls = mock.calls.EndpointURL
 	mock.lockEndpointURL.RUnlock()
+	return calls
+}
+
+// GetBucketPolicy calls GetBucketPolicyFunc.
+func (mock *S3Mock) GetBucketPolicy(ctx context.Context, bucketName string) (string, error) {
+	if mock.GetBucketPolicyFunc == nil {
+		panic("S3Mock.GetBucketPolicyFunc: method is nil but S3.GetBucketPolicy was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		BucketName string
+	}{
+		Ctx:        ctx,
+		BucketName: bucketName,
+	}
+	mock.lockGetBucketPolicy.Lock()
+	mock.calls.GetBucketPolicy = append(mock.calls.GetBucketPolicy, callInfo)
+	mock.lockGetBucketPolicy.Unlock()
+	return mock.GetBucketPolicyFunc(ctx, bucketName)
+}
+
+// GetBucketPolicyCalls gets all the calls that were made to GetBucketPolicy.
+// Check the length with:
+//
+//	len(mockedS3.GetBucketPolicyCalls())
+func (mock *S3Mock) GetBucketPolicyCalls() []struct {
+	Ctx        context.Context
+	BucketName string
+} {
+	var calls []struct {
+		Ctx        context.Context
+		BucketName string
+	}
+	mock.lockGetBucketPolicy.RLock()
+	calls = mock.calls.GetBucketPolicy
+	mock.lockGetBucketPolicy.RUnlock()
 	return calls
 }
 
@@ -603,5 +669,45 @@ func (mock *S3Mock) RemoveObjectsCalls() []struct {
 	mock.lockRemoveObjects.RLock()
 	calls = mock.calls.RemoveObjects
 	mock.lockRemoveObjects.RUnlock()
+	return calls
+}
+
+// SetBucketPolicy calls SetBucketPolicyFunc.
+func (mock *S3Mock) SetBucketPolicy(ctx context.Context, bucketName string, policy string) error {
+	if mock.SetBucketPolicyFunc == nil {
+		panic("S3Mock.SetBucketPolicyFunc: method is nil but S3.SetBucketPolicy was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		BucketName string
+		Policy     string
+	}{
+		Ctx:        ctx,
+		BucketName: bucketName,
+		Policy:     policy,
+	}
+	mock.lockSetBucketPolicy.Lock()
+	mock.calls.SetBucketPolicy = append(mock.calls.SetBucketPolicy, callInfo)
+	mock.lockSetBucketPolicy.Unlock()
+	return mock.SetBucketPolicyFunc(ctx, bucketName, policy)
+}
+
+// SetBucketPolicyCalls gets all the calls that were made to SetBucketPolicy.
+// Check the length with:
+//
+//	len(mockedS3.SetBucketPolicyCalls())
+func (mock *S3Mock) SetBucketPolicyCalls() []struct {
+	Ctx        context.Context
+	BucketName string
+	Policy     string
+} {
+	var calls []struct {
+		Ctx        context.Context
+		BucketName string
+		Policy     string
+	}
+	mock.lockSetBucketPolicy.RLock()
+	calls = mock.calls.SetBucketPolicy
+	mock.lockSetBucketPolicy.RUnlock()
 	return calls
 }

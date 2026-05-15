@@ -227,6 +227,8 @@ func main() {
 		r.Handle("/{instance}/api/buckets/{bucketName}/objects/bulk-delete", s3manager.HandleBulkDeleteObjectsWithManager(s3Manager)).Methods(http.MethodPost)
 	}
 	r.Handle("/{instance}/api/buckets/{bucketName}/objects/bulk-download", s3manager.HandleBulkDownloadObjectsWithManager(s3Manager)).Methods(http.MethodPost)
+	r.Handle("/{instance}/api/buckets/{bucketName}/policy", s3manager.HandleGetBucketPolicyWithManager(s3Manager)).Methods(http.MethodGet)
+	r.Handle("/{instance}/api/buckets/{bucketName}/policy", s3manager.HandlePutBucketPolicyWithManager(s3Manager)).Methods(http.MethodPut)
 
 	lr := logging.Handler(os.Stdout)(r)
 	srv := &http.Server{

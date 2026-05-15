@@ -36,7 +36,7 @@ func TestHandleDeleteObject(t *testing.T) {
 				return errS3
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
-			expectedBodyContains: http.StatusText(http.StatusInternalServerError),
+			expectedBodyContains: "mocked s3 error",
 		},
 	}
 

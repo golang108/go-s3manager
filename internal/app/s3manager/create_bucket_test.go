@@ -41,7 +41,7 @@ func TestHandleCreateBucket(t *testing.T) {
 			},
 			body:                 "",
 			expectedStatusCode:   http.StatusUnprocessableEntity,
-			expectedBodyContains: http.StatusText(http.StatusUnprocessableEntity),
+			expectedBodyContains: "error decoding body JSON",
 		},
 		{
 			it: "returns error for malformed request",
@@ -50,7 +50,7 @@ func TestHandleCreateBucket(t *testing.T) {
 			},
 			body:                 "}",
 			expectedStatusCode:   http.StatusUnprocessableEntity,
-			expectedBodyContains: http.StatusText(http.StatusUnprocessableEntity),
+			expectedBodyContains: "error decoding body JSON",
 		},
 		{
 			it: "returns error if there is an S3 error",
@@ -59,7 +59,7 @@ func TestHandleCreateBucket(t *testing.T) {
 			},
 			body:                 `{"name":"BUCKET-NAME"}`,
 			expectedStatusCode:   http.StatusInternalServerError,
-			expectedBodyContains: http.StatusText(http.StatusInternalServerError),
+			expectedBodyContains: "mocked s3 error",
 		},
 	}
 

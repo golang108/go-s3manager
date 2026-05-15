@@ -35,7 +35,7 @@ func TestHandleGetObject(t *testing.T) {
 			bucketName:           "BUCKET-NAME",
 			objectName:           "OBJECT-NAME",
 			expectedStatusCode:   http.StatusInternalServerError,
-			expectedBodyContains: http.StatusText(http.StatusInternalServerError),
+			expectedBodyContains: "mocked s3 error",
 		},
 	}
 

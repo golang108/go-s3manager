@@ -110,7 +110,7 @@ func TestHandleBucketView(t *testing.T) {
 			},
 			bucketName:           "BUCKET-NAME",
 			expectedStatusCode:   http.StatusNotFound,
-			expectedBodyContains: http.StatusText(http.StatusNotFound),
+			expectedBodyContains: "bucket does not exist",
 		},
 		{
 			it: "returns error if there is an S3 error",
@@ -124,7 +124,7 @@ func TestHandleBucketView(t *testing.T) {
 			},
 			bucketName:           "BUCKET-NAME",
 			expectedStatusCode:   http.StatusInternalServerError,
-			expectedBodyContains: http.StatusText(http.StatusInternalServerError),
+			expectedBodyContains: "mocked s3 error",
 		},
 		{
 			it: "renders a bucket with folder",
